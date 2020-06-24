@@ -1,6 +1,8 @@
 import unittest
+from collections import deque
 from functools import partial
-from CmdInterpreter import JarvisAPI
+
+from api import JarvisAPI
 
 
 class MockJarvisAPI(JarvisAPI):
@@ -28,7 +30,7 @@ class MockJarvisAPI(JarvisAPI):
             build()
 
         self.data = {}
-        self._input_queue = []
+        self._input_queue = deque()
         self.is_voice_enabled = False
 
     def say(self, text, color=""):
@@ -43,7 +45,7 @@ class MockJarvisAPI(JarvisAPI):
     def input(self, prompt='', color=''):
         if len(self._input_queue) == 0:
             raise BaseException("MockJarvisAPI: No predefined answer in queue - add answer with 'self.queue_input(\"TEXT\")'")
-        return self._input_queue.pop()
+        return self._input_queue.popleft()
 
     def input_number(self, prompt='', color='', rtype=float, rmin=None, rmax=None):
         return JarvisAPI.input_number(self, prompt, color, rtype, rmin, rmax)
