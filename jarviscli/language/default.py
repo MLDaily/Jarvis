@@ -11,7 +11,7 @@ class DefaultLanguageParser():
 
     def train(self, plugins):
         self.plugins = plugins
-        self.parser.pre_train(plugins)
+        self.parser.train(plugins)
 
     def identify_action(self, action):
         plugin = self._parse_input(action)
@@ -53,6 +53,31 @@ class DefaultLanguageParser():
         :return: returns the action"""
         output = "None"
         action_plugin = None
+        if not actions:
+            return action_plugin, output
 
+        words = data.split()
 
-        return output, action_plugin
+        action_map = {}
+        for plugin in actions:
+            for alias in [plugin.get_name()] + plugin.alias():
+                if alias.startswith(prefix):
+                    action_map[alias[len(prefix):]] = plugin
+        actions = list(action_map.keys())
+
+        # return longest matching word
+        # For now, this code returns acceptable results
+        actions.sort(key=lambda l: len(l), reverse=True)
+
+        # check word by word if exists an action with the same name
+        for action in actions:
+            words_remaining = data.split()
+            for word in words:
+                if word == action:
+                    words_remaining.remove(word)
+                    output = " ".join(words_remaining)
+                    action_plugin = action_map[action]
+
+                    return action_plugin, output
+
+        return None, None
